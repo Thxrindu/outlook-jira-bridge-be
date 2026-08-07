@@ -33,6 +33,6 @@ app.listen(PORT, () => {
   console.log(" Jira Bridge API");
   console.log("======================================");
   console.log(` Environment : ${process.env.NODE_ENV || "development"}`);
-  console.log(` Listening   : http://localhost:${PORT}`);
+  console.log(` Listening on port ${PORT}`);
   console.log("======================================");
 });
