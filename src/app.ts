@@ -1,26 +1,3 @@
-// import express from "express";
-// import cors from "cors";
-// import authRoutes from "./routes/authRoutes";
-// import { APP_CONFIG } from "./config/appConfig";
-
-// const app = express();
-
-// app.use(cors());
-
-// app.use(express.json());
-
-// app.use("/api/auth", authRoutes);
-
-// app.get("/api/health", (_, res) => {
-//   res.json({
-//     status: "Running",
-
-//     service: "Jira Bridge API",
-//   });
-// });
-
-// export default app;
-
 import express from "express";
 import cors from "cors";
 

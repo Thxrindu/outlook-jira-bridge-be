@@ -24,6 +24,6 @@ export const APP_CONFIG = {
 
   allowedOrigins:
     process.env.NODE_ENV === "production"
-      ? ["https://YOUR-ADDIN-DOMAIN.com"]
+      ? ["https://thxrindu.github.io"]
       : ["https://localhost:3000"],
 };
