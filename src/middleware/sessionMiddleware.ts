@@ -13,7 +13,6 @@ export function sessionMiddleware(
   next: NextFunction,
 ) {
   const auth = req.headers.authorization;
-  const jiraReq = req as JiraRequest;
 
   if (!auth) {
     return res.status(401).json({
@@ -21,7 +20,13 @@ export function sessionMiddleware(
     });
   }
 
-  const sessionId = auth.replace("Bearer ", "");
+  if (!auth.startsWith("Bearer ")) {
+    return res.status(401).json({
+      message: "Invalid authorization header.",
+    });
+  }
+
+  const sessionId = auth.substring(7);
 
   const session = getSession(sessionId);
 
@@ -31,7 +36,10 @@ export function sessionMiddleware(
     });
   }
 
+  const jiraReq = req as JiraRequest;
+
   jiraReq.sessionId = sessionId;
   jiraReq.jiraSession = session;
+
   next();
 }
