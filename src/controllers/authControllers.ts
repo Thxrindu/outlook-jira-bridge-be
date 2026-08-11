@@ -4,10 +4,12 @@ import {
   exchangeCodeForToken,
   getAccessibleResources,
   getCurrentJiraUser,
+  getValidAccessToken,
 } from "../services/oauthService";
 import { APP_CONFIG } from "../config/appConfig";
 import { createSession } from "../services/sessionService";
 import { JiraRequest } from "../middleware/sessionMiddleware";
+import { getSession } from "../services/sessionService";
 
 export async function exchangeToken(req: Request, res: Response) {
   try {
@@ -65,23 +67,39 @@ export async function exchangeToken(req: Request, res: Response) {
   }
 }
 
-// export async function currentUser(req: Request, res: Response) {
-//   try {
-//     //const { accessToken, cloudId } = req.body;
-//     const jiraReq = req as JiraRequest;
+export async function restoreSession(req: Request, res: Response) {
+  try {
+    const jiraReq = req as JiraRequest;
 
-//     const user = await getCurrentJiraUser(
-//       jiraReq.sessionId,
-//       jiraReq.jiraSession,
-//     );
-//     res.json(user);
-//   } catch (error: any) {
-//     console.log("Jira API Error:");
-//     console.log(error.response?.data);
-//     console.log(error.response?.status);
-//     res.status(500).json({
-//       message: "Unable to retrieve Jira user",
-//       error: error.response?.data,
-//     });
-//   }
-// }
+    const { sessionId, jiraSession } = jiraReq;
+
+    // This will return the existing token if valid,
+    // or refresh it if it has expired.
+    const accessToken = await getValidAccessToken(sessionId, jiraSession);
+
+    // Get the latest session after token refresh.
+    const updatedSession = getSession(sessionId);
+
+    if (!updatedSession) {
+      return res.status(401).json({
+        message: "Jira session expired.",
+      });
+    }
+
+    const jiraUser = await getCurrentJiraUser(
+      accessToken,
+      updatedSession.cloudId,
+    );
+
+    return res.json({
+      sessionId,
+      user: jiraUser,
+    });
+  } catch (error: any) {
+    console.error("Session restoration failed:", error.response?.data || error);
+
+    return res.status(401).json({
+      message: "Jira session expired. Please log in again.",
+    });
+  }
+}
